@@ -59,7 +59,7 @@ pub fn expand_deriving_rand(cx: &mut ExtCtxt,
                 explicit_self: None,
                 args: vec!(
                     Ptr(Box::new(Literal(Path::new_local("R"))),
-                        Borrowed(None, ast::MutMutable))
+                        Borrowed(None, ast::Mutability::Mutable))
                 ),
                 ret_ty: Self_,
                 attributes: Vec::new(),
@@ -129,7 +129,7 @@ fn rand_substructure(cx: &mut ExtCtxt, trait_span: Span, substr: &Substructure) 
             // rand() % variants.len()
             let value_ref = cx.expr_ident(trait_span, value_ident);
             let rand_variant = cx.expr_binary(trait_span,
-                                              ast::BiRem,
+                                              ast::BinOpKind::Rem,
                                               value_ref,
                                               variant_count);
 
@@ -147,7 +147,7 @@ fn rand_substructure(cx: &mut ExtCtxt, trait_span: Span, substr: &Substructure) 
 
             let match_expr = cx.expr_match(trait_span, rand_variant, arms);
 
-            let block = cx.block(trait_span, vec!( let_statement ), Some(match_expr));
+            let block = cx.block(trait_span, vec!( let_statement.unwrap() ), Some(match_expr));
             cx.expr_block(block)
         }
         _ => cx.bug("Non-static method in `derive(Rand)`")
